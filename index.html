@@ -93,8 +93,10 @@
   <div id="start-screen" class="hidden">
     <h1>Start Game</h1>
     <p id="start-info"></p>
-    <button class="mode-button" onclick="beginGame()">▶ Start Game</button>
-    <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
+    <div id="control-buttons">
+      <button class="mode-button" id="start-game-btn">▶ Start Game</button>
+      <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
+    </div>
   </div>
 
   <div id="game" class="hidden">
@@ -121,6 +123,7 @@
     const homeDiv = document.getElementById('home')
     const gameDiv = document.getElementById('game')
     const clickBtn = document.getElementById('click-button')
+    const startGameBtn = document.getElementById('start-game-btn')
 
     let gameDuration = 0
     let clickCount = 0
@@ -143,7 +146,7 @@
       timeButtonsContainer.innerHTML = ''
       timeModes.forEach(duration => {
         let label
-        if (duration === -1) label = ' ∞ Infinite Time'
+        if (duration === -1) label = '∞ Infinite'
         else label = duration >= 60 ? `${duration / 60} min` : `${duration}s`
         const btn = document.createElement('button')
         btn.className = 'mode-button'
@@ -162,6 +165,7 @@
       gameDiv.classList.add('hidden')
       startScreen.classList.remove('hidden')
       startInfo.textContent = `You chose ${label}. Click "Start Game" when you're ready.`
+      startGameBtn.onclick = beginGame
     }
 
     function beginGame() {
@@ -237,7 +241,7 @@
     }
 
     function resetGame() {
-      if (gameDuration === -1) saveHighScores()
+      saveHighScores()
       clickCount = 0
       cps = 0
       clickTimestamps = []
@@ -260,6 +264,7 @@
     }
 
     function goHome() {
+      saveHighScores()
       clearInterval(timerInterval)
       gameDiv.classList.add('hidden')
       startScreen.classList.add('hidden')
