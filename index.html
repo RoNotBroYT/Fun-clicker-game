@@ -121,7 +121,7 @@
   </div>
 
   <div id="start-screen">
-    <h2 style="text-align:center; margin-bottom:20px;">Get Ready</h2>
+    <h2 style="text-align:center; margin-bottom:20px;">Start Game</h2>
     <button id="start-game-btn" class="btn">Start Game</button>
     <button id="back-to-menu-btn" class="btn">Back to Menu</button>
   </div>
@@ -132,7 +132,7 @@
     <button id="click-btn" class="btn" style="font-size:2rem; padding:30px;">Click Me!</button>
     <div class="stats" id="live-cps">CPS: 0.00</div>
     <div class="stats" id="live-clicks">Clicks: 0</div>
-    <div class="stats" id="high-cps">High Score CPS: 0.00</div>
+    <div class="stats" id="high-cps">High ScoreCPS: 0.00</div>
     <div class="stats" id="high-clicks">High Score Clicks: 0</div>
     <div id="control-buttons">
       <button id="reset-btn" class="btn">Reset</button>
@@ -377,4 +377,153 @@ function renderScoreboard(mode) {
 
 function resetGame() {
   clicks = 0;
-  totalClicks = 0
+  totalClicks = 0;
+  cps = 0;
+  elapsedTime = 0;
+  remainingTime = modeDurations[selectedMode] || 0;
+  cpsIntervals = [];
+  if (selectedMode === "infinite") {
+    infiniteStartTime = performance.now();
+    infiniteElapsedTime = 0;
+    infiniteTimerDisplay.textContent = "Infinite 0.00s";
+    timerDisplay.textContent = "";
+    gameTimer = null;
+  } else {
+    infiniteTimerDisplay.textContent = "";
+  }
+  updateDisplay();
+  gameStarted = false;
+  showStartScreen();
+}
+
+function endGame() {
+  gameStarted = false;
+  updateHighScores();
+  updateDisplay();
+  alert("Time's up! Your clicks: " + clicks + " Live CPS: " + cps.toFixed(2));
+  showMainMenu();
+}
+
+function updateTimer() {
+  if (selectedMode !== "infinite" && selectedMode !== "basic" && gameStarted) {
+    remainingTime--;
+    timerDisplay.textContent = "Time Left: " + remainingTime + "s";
+    if (remainingTime <= 0) {
+      clearInterval(gameTimer);
+      gameTimer = null;
+      endGame();
+    }
+  }
+}
+
+function updateInfiniteTimer() {
+  if (gameStarted && selectedMode === "infinite") {
+    infiniteElapsedTime = performance.now() - infiniteStartTime;
+    infiniteTimerDisplay.textContent = "Infinite " + formatTime(infiniteElapsedTime);
+    requestAnimationFrame(updateInfiniteTimer);
+  }
+}
+
+document.querySelectorAll("#mode-buttons button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedMode = btn.dataset.mode;
+    startGame();
+  });
+});
+
+document.getElementById("start-game-btn").addEventListener("click", () => {
+  gameStarted = true;
+  if (selectedMode !== "infinite" && selectedMode !== "basic") {
+    timerDisplay.textContent = "Time Left: " + remainingTime + "s";
+    gameTimer = setInterval(updateTimer, 1000);
+  }
+  showGameArea();
+});
+
+document.getElementById("back-to-menu-btn").addEventListener("click", () => {
+  showMainMenu();
+});
+
+clickBtn.addEventListener("click", () => {
+  if (!gameStarted) return;
+  clicks++;
+  totalClicks++;
+  cpsIntervals.push(performance.now());
+  updateLiveStats();
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+  resetGame();
+});
+
+document.getElementById("back-home-btn").addEventListener("click", () => {
+  if (gameTimer) {
+    clearInterval(gameTimer);
+    gameTimer = null;
+  }
+  showMainMenu();
+});
+
+document.getElementById("scoreboard-menu-btn").addEventListener("click", () => {
+  showScoreboardMenu();
+});
+
+document.querySelectorAll(".scoreboard-mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    showScoreboardScreen(btn.dataset.mode);
+  });
+});
+
+document.getElementById("scoreboard-back-btn").addEventListener("click", () => {
+  showMainMenu();
+});
+
+document.getElementById("scoreboard-back-to-menu-btn").addEventListener("click", () => {
+  showScoreboardMenu();
+});
+
+document.getElementById("submit-score-btn").addEventListener("click", () => {
+  const name = playerNameInput.value.trim();
+  if (!name) {
+    alert("Please enter your name.");
+    return;
+  }
+  let scores = getHighScoresForMode(selectedMode);
+  if (clicks >= scores.clicks) {
+    scores.clicks = clicks;
+    scores.clicksName = name;
+  }
+  if (cps >= scores.cps) {
+    scores.cps = cps;
+    scores.cpsName = name;
+  }
+  if (selectedMode === "infinite" && infiniteElapsedTime > scores.milestoneTime) {
+    scores.milestoneTime = infiniteElapsedTime;
+    scores.milestoneName = name;
+  }
+  saveHighScores();
+  renderScoreboard(selectedMode);
+  playerNameInput.value = "";
+});
+
+document.getElementById("fullscreen-btn").addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+if (isMobile()) {
+  
+}
+
+startGame();
+showMainMenu();
+</script>
+</body>
+</html>
