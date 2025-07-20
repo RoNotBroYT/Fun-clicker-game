@@ -10,7 +10,7 @@
     font-family: Arial, sans-serif;
     background-color: #000;
     color: #0ff;
-    display: flex; 
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
@@ -86,12 +86,12 @@
 <body>
   <div id="home">
     <h1>Fun Clicker Game</h1>
-    <p>Select a mode:</p>
+    <p>Select mode:</p>
     <div class="button-container" id="time-buttons"></div>
   </div>
 
   <div id="start-screen" class="hidden">
-    <h1>Ready?</h1>
+    <h1>Sart Game</h1>
     <p id="start-info"></p>
     <div id="control-buttons">
       <button class="mode-button" id="start-game-btn">▶ Start Game</button>
@@ -101,7 +101,7 @@
 
   <div id="game" class="hidden">
     <h1>Click as fast as you can!</h1>
-    <div id="timer">Time Left: 0s</div>
+    <div id="timer">Time: --</div>
     <button id="click-button" onclick="handleClick()">Click Me!</button>
     <div class="stats">
       <p>Total Clicks: <span id="click-count">0</span></p>
@@ -116,7 +116,7 @@
   </div>
 
   <script>
-    const timeModes = [1, 2, 3, 5, 10, 60, 300, 600, -1]
+    const timeModes = [1, 2, 3, 5, 10, 60, 300, 600, -1, -2]
     const timeButtonsContainer = document.getElementById('time-buttons')
     const startScreen = document.getElementById('start-screen')
     const startInfo = document.getElementById('start-info')
@@ -132,6 +132,7 @@
     let clickTimestamps = []
     let endTime = 0
     let timerInterval
+    let infiniteStartTime = 0
 
     const clickCountEl = document.getElementById('click-count')
     const cpsEl = document.getElementById('cps')
@@ -139,15 +140,12 @@
     const highClicksEl = document.getElementById('high-clicks')
     const highCpsEl = document.getElementById('high-cps')
 
-    const milestones = [10, 50, 100, 200, 500, 1000]
-    let milestoneTimes = {}
-    let infiniteStartTime = 0
-
     function createModeButtons() {
       timeButtonsContainer.innerHTML = ''
       timeModes.forEach(duration => {
         let label
         if (duration === -1) label = '∞ Infinite'
+        else if (duration === -2) label = 'Endless Clicker'
         else label = duration >= 60 ? `${duration / 60} min` : `${duration}s`
         const btn = document.createElement('button')
         btn.className = 'mode-button'
@@ -160,7 +158,8 @@
     function showStartScreen(duration) {
       gameDuration = duration
       let label
-      if (duration === -1) label = "Infinite Mode"
+      if (duration === -1) label = "Infinite"
+      else if (duration === -2) label = "Endless Clicker"
       else label = duration >= 60 ? `${duration / 60} minute${duration > 60 ? 's' : ''}` : `${duration} second${duration > 1 ? 's' : ''}`
       homeDiv.classList.add('hidden')
       gameDiv.classList.add('hidden')
@@ -174,10 +173,10 @@
       cps = 0
       maxSessionCps = 0
       clickTimestamps = []
-      milestoneTimes = loadMilestoneTimes()
       infiniteStartTime = Date.now()
 
       if (gameDuration === -1) timerEl.textContent = "Time: 0.0s"
+      else if (gameDuration === -2) timerEl.textContent = "Endless Mode"
       else {
         endTime = Date.now() + gameDuration * 1000
         timerEl.textContent = `Time Left: ${gameDuration}s`
@@ -203,6 +202,8 @@
       if (gameDuration === -1) {
         const elapsed = (now - infiniteStartTime) / 1000
         timerEl.textContent = `Time: ${elapsed.toFixed(1)}s`
+      } else if (gameDuration === -2) {
+        timerEl.textContent = `Endless Mode`
       } else {
         const remaining = Math.max(0, Math.ceil((endTime - now) / 1000))
         timerEl.textContent = `Time Left: ${remaining}s`
@@ -226,7 +227,7 @@
       }
       localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
 
-      if (gameDuration !== -1 && now >= endTime) {
+      if (gameDuration > 0 && now >= endTime) {
         clearInterval(timerInterval)
         timerEl.textContent = "Time's up!"
         clickBtn.disabled = true
@@ -251,11 +252,10 @@
       highClicksEl.textContent = highData.clicks
       highCpsEl.textContent = highData.cps
       if (gameDuration === -1) infiniteStartTime = Date.now()
-      if (gameDuration !== -1) {
+      if (gameDuration === -2) timerEl.textContent = "Endless Mode"
+      if (gameDuration > 0) {
         endTime = Date.now() + gameDuration * 1000
         timerEl.textContent = `Time Left: ${gameDuration}s`
-      } else {
-        timerEl.textContent = "Time: 0.0s"
       }
       clickBtn.disabled = false
     }
@@ -279,15 +279,6 @@
       let newClicks = clickCount > saved.clicks ? clickCount : saved.clicks
       let newCps = maxSessionCps > saved.cps ? maxSessionCps : saved.cps
       localStorage.setItem(`mode-${gameDuration}`, JSON.stringify({ clicks: newClicks, cps: newCps }))
-    }
-
-    function loadMilestoneTimes() {
-      const saved = localStorage.getItem(`milestones-${gameDuration}`)
-      return saved ? JSON.parse(saved) : {}
-    }
-
-    function saveMilestoneTimes() {
-      localStorage.setItem(`milestones-${gameDuration}`, JSON.stringify(milestoneTimes))
     }
 
     createModeButtons()
