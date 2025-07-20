@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fun Clicker Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #0ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      user-select: none;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    #click-button {
+      font-size: 2rem;
+      padding: 20px 40px;
+      background-color: #0ff;
+      color: #000;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #0ff;
+      transition: transform 0.1s;
+    }
+
+    #click-button:active {
+      transform: scale(0.95);
+    }
+
+    .stats {
+      margin-top: 20px;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fun Clicker Game</h1>
+  <button id="click-button">Click Me!</button>
+
+  <div class="stats">
+    <p>Total Clicks: <span id="click-count">0</span></p>
+    <p>CPS: <span id="cps">0</span></p>
+    <p>High Score CPS: <span id="high-cps">0</span></p>
+  </div>
+
+  <script>
+    let clickCount = 0;
+    let cps = 0;
+    let highCPS = 0;
+    let clickTimestamps = [];
+
+    const clickBtn = document.getElementById('click-button');
+    const clickCountEl = document.getElementById('click-count');
+    const cpsEl = document.getElementById('cps');
+    const highCPSEl = document.getElementById('high-cps');
+
+    clickBtn.addEventListener('click', () => {
+      const now = Date.now();
+      clickCount++;
+      clickTimestamps.push(now);
+      clickCountEl.textContent = clickCount;
+      clickTimestamps = clickTimestamps.filter(ts => now - ts <= 1000);
+      cps = clickTimestamps.length;
+      cpsEl.textContent = cps;
+      if (cps > highCPS) {
+        highCPS = cps;
+        highCPSEl.textContent = highCPS;
+      }
+    });
+
+    setInterval(() => {
+      const now = Date.now();
+      clickTimestamps = clickTimestamps.filter(ts => now - ts <= 1000);
+      cps = clickTimestamps.length;
+      cpsEl.textContent = cps;
+    }, 100);
+  </script>
+
+</body>
+</html>
