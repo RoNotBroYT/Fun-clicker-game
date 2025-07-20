@@ -1,93 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fun Clicker Game</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #0ff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 20px;
-      user-select: none;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-
-    .button-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 300px;
-      margin-top: 20px;
-    }
-
-    .mode-button {
-      background-color: #0ff;
-      color: #000;
-      border: none;
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      box-shadow: 0 0 10px #0ff;
-      cursor: pointer;
-      text-align: center;
-      width: 100%;
-    }
-
-    .mode-button:hover {
-      background-color: #0cc;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #click-button {
-      font-size: 2rem;
-      padding: 20px 40px;
-      background-color: #0ff;
-      color: #000;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      box-shadow: 0 0 20px #0ff;
-      transition: transform 0.1s;
-      margin: 20px;
-    }
-
-    #click-button:active {
-      transform: scale(0.95);
-    }
-
-    .stats {
-      margin: 10px;
-      font-size: 1.2rem;
-    }
-
-    #timer {
-      font-size: 1.5rem;
-      margin: 10px;
-    }
-
-    #start-screen p {
-      font-size: 1.2rem;
-      margin: 20px 0;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fun Clicker Game</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #0ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    user-select: none;
+  }
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+    margin-top: 20px;
+  }
+  .mode-button {
+    background-color: #0ff;
+    color: #000;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    box-shadow: 0 0 10px #0ff;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+  }
+  .mode-button:hover {
+    background-color: #0cc;
+  }
+  .hidden {
+    display: none;
+  }
+  #click-button {
+    font-size: 2rem;
+    padding: 20px 40px;
+    background-color: #0ff;
+    color: #000;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 0 20px #0ff;
+    transition: transform 0.1s;
+    margin: 20px;
+  }
+  #click-button:active {
+    transform: scale(0.95);
+  }
+  .stats {
+    margin: 10px;
+    font-size: 1.2rem;
+  }
+  #timer {
+    font-size: 1.5rem;
+    margin: 10px;
+  }
+  #start-screen p {
+    font-size: 1.2rem;
+    margin: 20px 0;
+  }
+  #control-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+    margin-top: 20px;
+  }
+</style>
 </head>
 <body>
-
   <div id="home">
     <h1>Fun Clicker Game</h1>
     <p>Select a mode:</p>
@@ -105,149 +101,199 @@
     <h1>Click as fast as you can!</h1>
     <div id="timer">Time Left: 0s</div>
     <button id="click-button" onclick="handleClick()">Click Me!</button>
-
     <div class="stats">
       <p>Total Clicks: <span id="click-count">0</span></p>
       <p>CPS: <span id="cps">0</span></p>
-      <p>High Score Clicks: <span id="high-clicks">0</span></p> 
+      <p>High Score Clicks: <span id="high-clicks">0</span></p>
       <p>High Score CPS: <span id="high-cps">0</span></p>
     </div>
-
-    <button class="mode-button" onclick="resetGame()">🔄 Reset</button>
-    <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
+    <div id="control-buttons">
+      <button class="mode-button" onclick="resetGame()">🔄 Reset</button>
+      <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
+    </div>
   </div>
 
   <script>
-    const timeModes = [1, 2, 3, 5, 10, 60, 300, 600];
-    const timeButtonsContainer = document.getElementById('time-buttons');
-    const startScreen = document.getElementById('start-screen');
-    const startInfo = document.getElementById('start-info');
-    const homeDiv = document.getElementById('home');
-    const gameDiv = document.getElementById('game');
-    const clickBtn = document.getElementById('click-button');
+    const timeModes = [1, 2, 3, 5, 10, 60, 300, 600, -1]
+    const timeButtonsContainer = document.getElementById('time-buttons')
+    const startScreen = document.getElementById('start-screen')
+    const startInfo = document.getElementById('start-info')
+    const homeDiv = document.getElementById('home')
+    const gameDiv = document.getElementById('game')
+    const clickBtn = document.getElementById('click-button')
 
-    let gameDuration = 0;
-    let clickCount = 0;
-    let cps = 0;
-    let clickTimestamps = [];
-    let endTime = 0;
-    let timerInterval;
+    let gameDuration = 0
+    let clickCount = 0
+    let cps = 0
+    let clickTimestamps = []
+    let endTime = 0
+    let timerInterval
 
-    const clickCountEl = document.getElementById('click-count');
-    const cpsEl = document.getElementById('cps');
-    const timerEl = document.getElementById('timer');
-    const highClicksEl = document.getElementById('high-clicks');
-    const highCpsEl = document.getElementById('high-cps');
+    const clickCountEl = document.getElementById('click-count')
+    const cpsEl = document.getElementById('cps')
+    const timerEl = document.getElementById('timer')
+    const highClicksEl = document.getElementById('high-clicks')
+    const highCpsEl = document.getElementById('high-cps')
+
+    const milestones = [10, 50, 100, 200, 500, 1000]
+    let milestoneTimes = {}
+    let infiniteStartTime = 0
 
     function createModeButtons() {
-      timeButtonsContainer.innerHTML = '';
-      timeModes.forEach((duration) => {
-        const label = duration >= 60 ? `${duration / 60} min` : `${duration}s`;
-        const btn = document.createElement('button');
-        btn.className = 'mode-button';
-        btn.innerText = label;
-        btn.onclick = () => showStartScreen(duration);
-        timeButtonsContainer.appendChild(btn);
-      });
+      timeButtonsContainer.innerHTML = ''
+      timeModes.forEach(duration => {
+        let label
+        if (duration === -1) label = ' ∞ Infinite Time'
+        else label = duration >= 60 ? `${duration / 60} min` : `${duration}s`
+        const btn = document.createElement('button')
+        btn.className = 'mode-button'
+        btn.innerText = label
+        btn.onclick = () => showStartScreen(duration)
+        timeButtonsContainer.appendChild(btn)
+      })
     }
 
     function showStartScreen(duration) {
-      gameDuration = duration;
-      const label = duration >= 60 ? `${duration / 60} minute${duration > 60 ? 's' : ''}` : `${duration} second${duration > 1 ? 's' : ''}`;
-      homeDiv.classList.add('hidden');
-      gameDiv.classList.add('hidden');
-      startScreen.classList.remove('hidden');
-      startInfo.textContent = `You chose ${label}. Click "Start Game" when you're ready.`;
+      gameDuration = duration
+      let label
+      if (duration === -1) label = "Infinite Mode"
+      else label = duration >= 60 ? `${duration / 60} minute${duration > 60 ? 's' : ''}` : `${duration} second${duration > 1 ? 's' : ''}`
+      homeDiv.classList.add('hidden')
+      gameDiv.classList.add('hidden')
+      startScreen.classList.remove('hidden')
+      startInfo.textContent = `You chose ${label}. Click "Start Game" when you're ready.`
     }
 
     function beginGame() {
-      clickCount = 0;
-      cps = 0;
-      clickTimestamps = [];
-      endTime = Date.now() + gameDuration * 1000;
+      clickCount = 0
+      cps = 0
+      clickTimestamps = []
+      milestoneTimes = loadMilestoneTimes()
+      infiniteStartTime = Date.now()
 
-      clickCountEl.textContent = 0;
-      cpsEl.textContent = 0;
-      timerEl.textContent = `Time Left: ${gameDuration}s`;
+      if (gameDuration === -1) timerEl.textContent = "Time: 0.0s"
+      else {
+        endTime = Date.now() + gameDuration * 1000
+        timerEl.textContent = `Time Left: ${gameDuration}s`
+      }
 
-      const highData = getHighScores();
-      highClicksEl.textContent = highData.clicks;
-      highCpsEl.textContent = highData.cps;
+      clickCountEl.textContent = 0
+      cpsEl.textContent = 0
 
-      startScreen.classList.add('hidden');
-      gameDiv.classList.remove('hidden');
-      clickBtn.disabled = false;
+      const highData = getHighScores()
+      highClicksEl.textContent = highData.clicks
+      highCpsEl.textContent = highData.cps
 
-      clearInterval(timerInterval);
-      timerInterval = setInterval(updateTimer, 100);
+      startScreen.classList.add('hidden')
+      gameDiv.classList.remove('hidden')
+      clickBtn.disabled = false
+
+      clearInterval(timerInterval)
+      timerInterval = setInterval(updateTimer, 100)
     }
 
     function updateTimer() {
-      const now = Date.now();
-      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
-      timerEl.textContent = `Time Left: ${remaining}s`;
+      const now = Date.now()
+      if (gameDuration === -1) {
+        const elapsed = (now - infiniteStartTime) / 1000
+        timerEl.textContent = `Time: ${elapsed.toFixed(1)}s`
+      } else {
+        const remaining = Math.max(0, Math.ceil((endTime - now) / 1000))
+        timerEl.textContent = `Time Left: ${remaining}s`
+      }
 
-      const recentClicks = clickTimestamps.filter(ts => now - ts <= 1000);
-      cps = recentClicks.length;
-      cpsEl.textContent = cps;
-      clickTimestamps = recentClicks;
+      const recentClicks = clickTimestamps.filter(ts => now - ts <= 1000)
+      cps = recentClicks.length
+      cpsEl.textContent = cps
+      clickTimestamps = recentClicks
 
-      if (now >= endTime) {
-        clearInterval(timerInterval);
-        timerEl.textContent = "Time's up!";
-        clickBtn.disabled = true;
-        saveHighScores();
+      if (gameDuration !== -1 && now >= endTime) {
+        clearInterval(timerInterval)
+        timerEl.textContent = "Time's up!"
+        clickBtn.disabled = true
+        saveHighScores()
       }
     }
 
     function handleClick() {
-      const now = Date.now();
-      clickCount++;
-      clickTimestamps.push(now);
-      clickCountEl.textContent = clickCount;
+      const now = Date.now()
+      clickCount++
+      clickTimestamps.push(now)
+      clickCountEl.textContent = clickCount
+      if (gameDuration === -1) checkMilestones()
+    }
+
+    function checkMilestones() {
+      const now = Date.now()
+      milestones.forEach(milestone => {
+        if (clickCount === milestone) {
+          const elapsed = now - infiniteStartTime
+          if (!milestoneTimes[milestone] || elapsed < milestoneTimes[milestone]) {
+            milestoneTimes[milestone] = elapsed
+            saveMilestoneTimes()
+          }
+        }
+      })
     }
 
     function resetGame() {
-      clickCount = 0;
-      cps = 0;
-      clickTimestamps = [];
-      endTime = Date.now() + gameDuration * 1000;
+      if (gameDuration === -1) saveHighScores()
+      clickCount = 0
+      cps = 0
+      clickTimestamps = []
+      milestoneTimes = loadMilestoneTimes()
+      infiniteStartTime = Date.now()
 
-      clickCountEl.textContent = 0;
-      cpsEl.textContent = 0;
-      clickBtn.disabled = false;
-      timerEl.textContent = `Time Left: ${gameDuration}s`;
+      if (gameDuration !== -1) {
+        endTime = Date.now() + gameDuration * 1000
+        timerEl.textContent = `Time Left: ${gameDuration}s`
+      } else {
+        timerEl.textContent = "Time: 0.0s"
+      }
 
-      clearInterval(timerInterval);
-      timerInterval = setInterval(updateTimer, 100);
+      clickCountEl.textContent = 0
+      cpsEl.textContent = 0
+      clickBtn.disabled = false
+
+      clearInterval(timerInterval)
+      timerInterval = setInterval(updateTimer, 100)
     }
 
     function goHome() {
-      clearInterval(timerInterval);
-      gameDiv.classList.add('hidden');
-      startScreen.classList.add('hidden');
-      homeDiv.classList.remove('hidden');
-      createModeButtons();
+      clearInterval(timerInterval)
+      gameDiv.classList.add('hidden')
+      startScreen.classList.add('hidden')
+      homeDiv.classList.remove('hidden')
+      createModeButtons()
     }
 
     function getHighScores() {
-      const key = `mode-${gameDuration}`;
-      const saved = JSON.parse(localStorage.getItem(key)) || { clicks: 0, cps: 0 };
-      return saved;
+      const key = `mode-${gameDuration}`
+      const saved = JSON.parse(localStorage.getItem(key)) || { clicks: 0, cps: 0 }
+      return saved
     }
 
     function saveHighScores() {
-      const key = `mode-${gameDuration}`;
-      const saved = getHighScores();
-      const maxCps = Math.max(saved.cps, cps);
-      const maxClicks = Math.max(saved.clicks, clickCount);
-      localStorage.setItem(key, JSON.stringify({ cps: maxCps, clicks: maxClicks }));
-      highCpsEl.textContent = maxCps;
-      highClicksEl.textContent = maxClicks;
+      const key = `mode-${gameDuration}`
+      const saved = getHighScores()
+      const maxCps = Math.max(saved.cps, cps)
+      const maxClicks = Math.max(saved.clicks, clickCount)
+      localStorage.setItem(key, JSON.stringify({ cps: maxCps, clicks: maxClicks }))
+      highClicksEl.textContent = maxClicks
+      highCpsEl.textContent = maxCps
     }
 
-    createModeButtons();
-  </script>
+    function loadMilestoneTimes() {
+      const key = `milestones-${gameDuration}`
+      return JSON.parse(localStorage.getItem(key)) || {}
+    }
 
+    function saveMilestoneTimes() {
+      const key = `milestones-${gameDuration}`
+      localStorage.setItem(key, JSON.stringify(milestoneTimes))
+    }
+
+    createModeButtons()
+  </script>
 </body>
 </html>
