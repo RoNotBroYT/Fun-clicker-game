@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fun Clicker Game</title>
 <style>
-  body { 
+  body {
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: #000;
@@ -91,7 +91,7 @@
   </div>
 
   <div id="start-screen" class="hidden">
-    <h1>Sart Game</h1>
+    <h1>Ready?</h1>
     <p id="start-info"></p>
     <div id="control-buttons">
       <button class="mode-button" id="start-game-btn">▶ Start Game</button>
@@ -215,51 +215,28 @@
 
       if (cps > maxSessionCps) maxSessionCps = cps
 
-      if (gameDuration === -1) {
-        const saved = getHighScores()
-        if (maxSessionCps > saved.cps) {
-          saved.cps = maxSessionCps
-          localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
-          highCpsEl.textContent = maxSessionCps
-        }
+      const saved = getHighScores()
+      if (clickCount > saved.clicks) {
+        saved.clicks = clickCount
+        highClicksEl.textContent = clickCount
       }
+      if (maxSessionCps > saved.cps) {
+        saved.cps = maxSessionCps
+        highCpsEl.textContent = maxSessionCps
+      }
+      localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
 
       if (gameDuration !== -1 && now >= endTime) {
         clearInterval(timerInterval)
         timerEl.textContent = "Time's up!"
         clickBtn.disabled = true
-        saveHighScores()
       }
     }
 
     function handleClick() {
-      const now = Date.now()
       clickCount++
-      clickTimestamps.push(now)
+      clickTimestamps.push(Date.now())
       clickCountEl.textContent = clickCount
-
-      if (gameDuration === -1) {
-        const saved = getHighScores()
-        if (clickCount > saved.clicks) {
-          saved.clicks = clickCount
-          localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
-          highClicksEl.textContent = clickCount
-        }
-      }
-      if (gameDuration === -1) checkMilestones()
-    }
-
-    function checkMilestones() {
-      const now = Date.now()
-      milestones.forEach(milestone => {
-        if (clickCount === milestone) {
-          const elapsed = now - infiniteStartTime
-          if (!milestoneTimes[milestone] || elapsed < milestoneTimes[milestone]) {
-            milestoneTimes[milestone] = elapsed
-            saveMilestoneTimes()
-          }
-        }
-      })
     }
 
     function resetGame() {
@@ -270,8 +247,9 @@
       clickTimestamps = []
       clickCountEl.textContent = 0
       cpsEl.textContent = 0
-      highClicksEl.textContent = getHighScores().clicks
-      highCpsEl.textContent = getHighScores().cps
+      const highData = getHighScores()
+      highClicksEl.textContent = highData.clicks
+      highCpsEl.textContent = highData.cps
       if (gameDuration === -1) infiniteStartTime = Date.now()
       if (gameDuration !== -1) {
         endTime = Date.now() + gameDuration * 1000
