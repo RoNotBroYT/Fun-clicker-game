@@ -13,26 +13,40 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 20px;
       user-select: none;
     }
 
     h1 {
       font-size: 2.5rem;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
-    .button {
-      font-size: 1.2rem;
-      padding: 10px 20px;
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 300px;
+      margin-top: 20px;
+    }
+
+    .mode-button {
       background-color: #0ff;
       color: #000;
       border: none;
+      padding: 15px;
       border-radius: 10px;
-      cursor: pointer;
-      margin: 10px;
+      font-size: 1.1rem;
       box-shadow: 0 0 10px #0ff;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+    }
+
+    .mode-button:hover {
+      background-color: #0cc;
     }
 
     .hidden {
@@ -66,9 +80,9 @@
       margin: 10px;
     }
 
-    .high-score {
-      color: #0ff;
-      font-size: 1rem;
+    #start-screen p {
+      font-size: 1.2rem;
+      margin: 20px 0;
     }
   </style>
 </head>
@@ -76,75 +90,95 @@
 
   <div id="home">
     <h1>Fun Clicker Game</h1>
-    <p>Select a Mode:</p>
-    <div id="time-buttons">
-      <button class="button" onclick="startGame(1)">1s</button>
-      <button class="button" onclick="startGame(2)">2s</button>
-      <button class="button" onclick="startGame(3)">3s</button>
-      <button class="button" onclick="startGame(5)">5s</button>
-      <button class="button" onclick="startGame(10)">10s</button>
-      <button class="button" onclick="startGame(60)">1 min</button>
-      <button class="button" onclick="startGame(300)">5 min</button>
-      <button class="button" onclick="startGame(600)">10 min</button>
-    </div>
+    <p>Select a mode:</p>
+    <div class="button-container" id="time-buttons"></div>
+  </div>
+
+  <div id="start-screen" class="hidden">
+    <h1>Start Game</h1>
+    <p id="start-info"></p>
+    <button class="mode-button" onclick="beginGame()">▶ Start Game</button>
+    <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
   </div>
 
   <div id="game" class="hidden">
-    <h1>Click as Fast as You Can!</h1>
+    <h1>Click as fast as you can!</h1>
     <div id="timer">Time Left: 0s</div>
     <button id="click-button" onclick="handleClick()">Click Me!</button>
 
     <div class="stats">
       <p>Total Clicks: <span id="click-count">0</span></p>
       <p>CPS: <span id="cps">0</span></p>
+      <p>High Score Clicks: <span id="high-clicks">0</span></p> 
       <p>High Score CPS: <span id="high-cps">0</span></p>
-      <p>High Score Clicks: <span id="high-clicks">0</span></p>
     </div>
 
-    <button class="button" onclick="resetGame()">Reset</button>
-    <button class="button" onclick="goHome()">Back to Home</button>
+    <button class="mode-button" onclick="resetGame()">🔄 Reset</button>
+    <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
   </div>
 
   <script>
-    let clickCount = 0;
-    let cps = 0;
-    let highCPS = 0;
-    let highClicks = 0;
-    let clickTimestamps = [];
-    let gameDuration = 0;
-    let endTime = 0;
-    let timerInterval;
-    let currentModeKey = '';
-
-    const clickCountEl = document.getElementById('click-count');
-    const cpsEl = document.getElementById('cps');
-    const highCPSEl = document.getElementById('high-cps');
-    const highClicksEl = document.getElementById('high-clicks');
-    const timerEl = document.getElementById('timer');
+    const timeModes = [1, 2, 3, 5, 10, 60, 300, 600];
+    const timeButtonsContainer = document.getElementById('time-buttons');
+    const startScreen = document.getElementById('start-screen');
+    const startInfo = document.getElementById('start-info');
     const homeDiv = document.getElementById('home');
     const gameDiv = document.getElementById('game');
     const clickBtn = document.getElementById('click-button');
 
-    function startGame(duration) {
+    let gameDuration = 0;
+    let clickCount = 0;
+    let cps = 0;
+    let clickTimestamps = [];
+    let endTime = 0;
+    let timerInterval;
+
+    const clickCountEl = document.getElementById('click-count');
+    const cpsEl = document.getElementById('cps');
+    const timerEl = document.getElementById('timer');
+    const highClicksEl = document.getElementById('high-clicks');
+    const highCpsEl = document.getElementById('high-cps');
+
+    function createModeButtons() {
+      timeButtonsContainer.innerHTML = '';
+      timeModes.forEach((duration) => {
+        const label = duration >= 60 ? `${duration / 60} min` : `${duration}s`;
+        const btn = document.createElement('button');
+        btn.className = 'mode-button';
+        btn.innerText = label;
+        btn.onclick = () => showStartScreen(duration);
+        timeButtonsContainer.appendChild(btn);
+      });
+    }
+
+    function showStartScreen(duration) {
       gameDuration = duration;
-      currentModeKey = `mode_${duration}s`;
+      const label = duration >= 60 ? `${duration / 60} minute${duration > 60 ? 's' : ''}` : `${duration} second${duration > 1 ? 's' : ''}`;
+      homeDiv.classList.add('hidden');
+      gameDiv.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      startInfo.textContent = `You chose ${label}. Click "Start Game" when you're ready.`;
+    }
+
+    function beginGame() {
       clickCount = 0;
       cps = 0;
       clickTimestamps = [];
-      endTime = Date.now() + duration * 1000;
-
-      highCPS = parseInt(localStorage.getItem(currentModeKey + "_cps")) || 0;
-      highClicks = parseInt(localStorage.getItem(currentModeKey + "_clicks")) || 0;
+      endTime = Date.now() + gameDuration * 1000;
 
       clickCountEl.textContent = 0;
       cpsEl.textContent = 0;
-      highCPSEl.textContent = highCPS;
-      highClicksEl.textContent = highClicks;
+      timerEl.textContent = `Time Left: ${gameDuration}s`;
 
-      homeDiv.classList.add('hidden');
+      const highData = getHighScores();
+      highClicksEl.textContent = highData.clicks;
+      highCpsEl.textContent = highData.cps;
+
+      startScreen.classList.add('hidden');
       gameDiv.classList.remove('hidden');
       clickBtn.disabled = false;
 
+      clearInterval(timerInterval);
       timerInterval = setInterval(updateTimer, 100);
     }
 
@@ -156,25 +190,13 @@
       const recentClicks = clickTimestamps.filter(ts => now - ts <= 1000);
       cps = recentClicks.length;
       cpsEl.textContent = cps;
-
       clickTimestamps = recentClicks;
 
       if (now >= endTime) {
         clearInterval(timerInterval);
         timerEl.textContent = "Time's up!";
         clickBtn.disabled = true;
-
-        if (clickCount > highClicks) {
-          highClicks = clickCount;
-          localStorage.setItem(currentModeKey + "_clicks", highClicks);
-          highClicksEl.textContent = highClicks;
-        }
-
-        if (cps > highCPS) {
-          highCPS = cps;
-          localStorage.setItem(currentModeKey + "_cps", highCPS);
-          highCPSEl.textContent = highCPS;
-        }
+        saveHighScores();
       }
     }
 
@@ -203,8 +225,28 @@
     function goHome() {
       clearInterval(timerInterval);
       gameDiv.classList.add('hidden');
+      startScreen.classList.add('hidden');
       homeDiv.classList.remove('hidden');
+      createModeButtons();
     }
+
+    function getHighScores() {
+      const key = `mode-${gameDuration}`;
+      const saved = JSON.parse(localStorage.getItem(key)) || { clicks: 0, cps: 0 };
+      return saved;
+    }
+
+    function saveHighScores() {
+      const key = `mode-${gameDuration}`;
+      const saved = getHighScores();
+      const maxCps = Math.max(saved.cps, cps);
+      const maxClicks = Math.max(saved.clicks, clickCount);
+      localStorage.setItem(key, JSON.stringify({ cps: maxCps, clicks: maxClicks }));
+      highCpsEl.textContent = maxCps;
+      highClicksEl.textContent = maxClicks;
+    }
+
+    createModeButtons();
   </script>
 
 </body>
