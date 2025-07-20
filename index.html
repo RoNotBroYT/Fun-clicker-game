@@ -128,6 +128,7 @@
     let gameDuration = 0
     let clickCount = 0
     let cps = 0
+    let maxSessionCps = 0
     let clickTimestamps = []
     let endTime = 0
     let timerInterval
@@ -171,6 +172,7 @@
     function beginGame() {
       clickCount = 0
       cps = 0
+      maxSessionCps = 0
       clickTimestamps = []
       milestoneTimes = loadMilestoneTimes()
       infiniteStartTime = Date.now()
@@ -211,6 +213,17 @@
       cpsEl.textContent = cps
       clickTimestamps = recentClicks
 
+      if (cps > maxSessionCps) maxSessionCps = cps
+
+      if (gameDuration === -1) {
+        const saved = getHighScores()
+        if (maxSessionCps > saved.cps) {
+          saved.cps = maxSessionCps
+          localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
+          highCpsEl.textContent = maxSessionCps
+        }
+      }
+
       if (gameDuration !== -1 && now >= endTime) {
         clearInterval(timerInterval)
         timerEl.textContent = "Time's up!"
@@ -224,6 +237,15 @@
       clickCount++
       clickTimestamps.push(now)
       clickCountEl.textContent = clickCount
+
+      if (gameDuration === -1) {
+        const saved = getHighScores()
+        if (clickCount > saved.clicks) {
+          saved.clicks = clickCount
+          localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
+          highClicksEl.textContent = clickCount
+        }
+      }
       if (gameDuration === -1) checkMilestones()
     }
 
@@ -244,58 +266,50 @@
       saveHighScores()
       clickCount = 0
       cps = 0
+      maxSessionCps = 0
       clickTimestamps = []
-      milestoneTimes = loadMilestoneTimes()
-      infiniteStartTime = Date.now()
-
+      clickCountEl.textContent = 0
+      cpsEl.textContent = 0
+      highClicksEl.textContent = getHighScores().clicks
+      highCpsEl.textContent = getHighScores().cps
+      if (gameDuration === -1) infiniteStartTime = Date.now()
       if (gameDuration !== -1) {
         endTime = Date.now() + gameDuration * 1000
         timerEl.textContent = `Time Left: ${gameDuration}s`
       } else {
         timerEl.textContent = "Time: 0.0s"
       }
-
-      clickCountEl.textContent = 0
-      cpsEl.textContent = 0
       clickBtn.disabled = false
-
-      clearInterval(timerInterval)
-      timerInterval = setInterval(updateTimer, 100)
     }
 
     function goHome() {
-      saveHighScores()
       clearInterval(timerInterval)
-      gameDiv.classList.add('hidden')
       startScreen.classList.add('hidden')
+      gameDiv.classList.add('hidden')
       homeDiv.classList.remove('hidden')
-      createModeButtons()
+      gameDuration = 0
     }
 
     function getHighScores() {
-      const key = `mode-${gameDuration}`
-      const saved = JSON.parse(localStorage.getItem(key)) || { clicks: 0, cps: 0 }
-      return saved
+      const saved = localStorage.getItem(`mode-${gameDuration}`)
+      if (!saved) return { clicks: 0, cps: 0 }
+      return JSON.parse(saved)
     }
 
     function saveHighScores() {
-      const key = `mode-${gameDuration}`
       const saved = getHighScores()
-      const maxCps = Math.max(saved.cps, cps)
-      const maxClicks = Math.max(saved.clicks, clickCount)
-      localStorage.setItem(key, JSON.stringify({ cps: maxCps, clicks: maxClicks }))
-      highClicksEl.textContent = maxClicks
-      highCpsEl.textContent = maxCps
+      let newClicks = clickCount > saved.clicks ? clickCount : saved.clicks
+      let newCps = maxSessionCps > saved.cps ? maxSessionCps : saved.cps
+      localStorage.setItem(`mode-${gameDuration}`, JSON.stringify({ clicks: newClicks, cps: newCps }))
     }
 
     function loadMilestoneTimes() {
-      const key = `milestones-${gameDuration}`
-      return JSON.parse(localStorage.getItem(key)) || {}
+      const saved = localStorage.getItem(`milestones-${gameDuration}`)
+      return saved ? JSON.parse(saved) : {}
     }
 
     function saveMilestoneTimes() {
-      const key = `milestones-${gameDuration}`
-      localStorage.setItem(key, JSON.stringify(milestoneTimes))
+      localStorage.setItem(`milestones-${gameDuration}`, JSON.stringify(milestoneTimes))
     }
 
     createModeButtons()
