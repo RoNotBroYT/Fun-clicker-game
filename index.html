@@ -19,8 +19,24 @@
     }
 
     h1 {
-      font-size: 3rem;
-      margin-bottom: 10px;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+      background-color: #0ff;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      box-shadow: 0 0 10px #0ff;
+    }
+
+    .hidden {
+      display: none;
     }
 
     #click-button {
@@ -33,6 +49,7 @@
       cursor: pointer;
       box-shadow: 0 0 20px #0ff;
       transition: transform 0.1s;
+      margin: 20px;
     }
 
     #click-button:active {
@@ -40,53 +57,154 @@
     }
 
     .stats {
-      margin-top: 20px;
+      margin: 10px;
+      font-size: 1.2rem;
+    }
+
+    #timer {
       font-size: 1.5rem;
+      margin: 10px;
+    }
+
+    .high-score {
+      color: #0ff;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <h1>Fun Clicker Game</h1>
-  <button id="click-button">Click Me!</button>
+  <div id="home">
+    <h1>Fun Clicker Game</h1>
+    <p>Select a Mode:</p>
+    <div id="time-buttons">
+      <button class="button" onclick="startGame(1)">1s</button>
+      <button class="button" onclick="startGame(2)">2s</button>
+      <button class="button" onclick="startGame(3)">3s</button>
+      <button class="button" onclick="startGame(5)">5s</button>
+      <button class="button" onclick="startGame(10)">10s</button>
+      <button class="button" onclick="startGame(60)">1 min</button>
+      <button class="button" onclick="startGame(300)">5 min</button>
+      <button class="button" onclick="startGame(600)">10 min</button>
+    </div>
+  </div>
 
-  <div class="stats">
-    <p>Total Clicks: <span id="click-count">0</span></p>
-    <p>CPS: <span id="cps">0</span></p>
-    <p>High Score CPS: <span id="high-cps">0</span></p>
+  <div id="game" class="hidden">
+    <h1>Click as Fast as You Can!</h1>
+    <div id="timer">Time Left: 0s</div>
+    <button id="click-button" onclick="handleClick()">Click Me!</button>
+
+    <div class="stats">
+      <p>Total Clicks: <span id="click-count">0</span></p>
+      <p>CPS: <span id="cps">0</span></p>
+      <p>High Score CPS: <span id="high-cps">0</span></p>
+      <p>High Score Clicks: <span id="high-clicks">0</span></p>
+    </div>
+
+    <button class="button" onclick="resetGame()">Reset</button>
+    <button class="button" onclick="goHome()">Back to Home</button>
   </div>
 
   <script>
     let clickCount = 0;
     let cps = 0;
     let highCPS = 0;
+    let highClicks = 0;
     let clickTimestamps = [];
+    let gameDuration = 0;
+    let endTime = 0;
+    let timerInterval;
+    let currentModeKey = '';
 
-    const clickBtn = document.getElementById('click-button');
     const clickCountEl = document.getElementById('click-count');
     const cpsEl = document.getElementById('cps');
     const highCPSEl = document.getElementById('high-cps');
+    const highClicksEl = document.getElementById('high-clicks');
+    const timerEl = document.getElementById('timer');
+    const homeDiv = document.getElementById('home');
+    const gameDiv = document.getElementById('game');
+    const clickBtn = document.getElementById('click-button');
 
-    clickBtn.addEventListener('click', () => {
+    function startGame(duration) {
+      gameDuration = duration;
+      currentModeKey = `mode_${duration}s`;
+      clickCount = 0;
+      cps = 0;
+      clickTimestamps = [];
+      endTime = Date.now() + duration * 1000;
+
+      highCPS = parseInt(localStorage.getItem(currentModeKey + "_cps")) || 0;
+      highClicks = parseInt(localStorage.getItem(currentModeKey + "_clicks")) || 0;
+
+      clickCountEl.textContent = 0;
+      cpsEl.textContent = 0;
+      highCPSEl.textContent = highCPS;
+      highClicksEl.textContent = highClicks;
+
+      homeDiv.classList.add('hidden');
+      gameDiv.classList.remove('hidden');
+      clickBtn.disabled = false;
+
+      timerInterval = setInterval(updateTimer, 100);
+    }
+
+    function updateTimer() {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      timerEl.textContent = `Time Left: ${remaining}s`;
+
+      const recentClicks = clickTimestamps.filter(ts => now - ts <= 1000);
+      cps = recentClicks.length;
+      cpsEl.textContent = cps;
+
+      clickTimestamps = recentClicks;
+
+      if (now >= endTime) {
+        clearInterval(timerInterval);
+        timerEl.textContent = "Time's up!";
+        clickBtn.disabled = true;
+
+        if (clickCount > highClicks) {
+          highClicks = clickCount;
+          localStorage.setItem(currentModeKey + "_clicks", highClicks);
+          highClicksEl.textContent = highClicks;
+        }
+
+        if (cps > highCPS) {
+          highCPS = cps;
+          localStorage.setItem(currentModeKey + "_cps", highCPS);
+          highCPSEl.textContent = highCPS;
+        }
+      }
+    }
+
+    function handleClick() {
       const now = Date.now();
       clickCount++;
       clickTimestamps.push(now);
       clickCountEl.textContent = clickCount;
-      clickTimestamps = clickTimestamps.filter(ts => now - ts <= 1000);
-      cps = clickTimestamps.length;
-      cpsEl.textContent = cps;
-      if (cps > highCPS) {
-        highCPS = cps;
-        highCPSEl.textContent = highCPS;
-      }
-    });
+    }
 
-    setInterval(() => {
-      const now = Date.now();
-      clickTimestamps = clickTimestamps.filter(ts => now - ts <= 1000);
-      cps = clickTimestamps.length;
-      cpsEl.textContent = cps;
-    }, 100);
+    function resetGame() {
+      clickCount = 0;
+      cps = 0;
+      clickTimestamps = [];
+      endTime = Date.now() + gameDuration * 1000;
+
+      clickCountEl.textContent = 0;
+      cpsEl.textContent = 0;
+      clickBtn.disabled = false;
+      timerEl.textContent = `Time Left: ${gameDuration}s`;
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 100);
+    }
+
+    function goHome() {
+      clearInterval(timerInterval);
+      gameDiv.classList.add('hidden');
+      homeDiv.classList.remove('hidden');
+    }
   </script>
 
 </body>
