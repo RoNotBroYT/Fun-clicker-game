@@ -1,289 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fun Clicker Game</title>
-  <style>
-    body {
-      background-color: black;
-      color: cyan;
-      font-family: sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    } 
-    .hidden { display: none; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fun Clicker Game</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: cyan;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    align-items: center;
+    user-select: none;
+  }
+  #app {
+    max-width: 400px;
+    width: 95vw;
+  }
+  .btn {
+    background: linear-gradient(135deg, #00ffff, #009999);
+    border-radius: 25px;
+    border: none;
+    color: black;
+    font-weight: bold;
+    font-size: 1.5rem;
+    padding: 18px;
+    margin: 12px 0;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 0 12px #00ffffaa;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #00ffffee;
+  }
+  .btn:active {
+    transform: scale(0.95);
+  }
+  #mode-buttons, #control-buttons, #scoreboard-menu {
+    display: flex;
+    flex-direction: column;
+  }
+  #control-buttons {
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .stats, #timer, #infinite-timer {
+    font-size: 1.3rem;
+    margin: 10px 0 20px 0;
+    font-weight: bold;
+    text-align: center;
+    color: #0ff;
+  }
+  #game-area, #start-screen, #scoreboard-screen, #scoreboard-menu {
+    display: none;
+  }
+  #scoreboard-list {
+    margin-top: 15px;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 2px solid #0ff;
+    border-radius: 12px;
+    padding: 10px;
+    background: #001111;
+  }
+  #scoreboard-list table {
+    width: 100%;
+    border-collapse: collapse;
+    color: cyan;
+  }
+  #scoreboard-list th, #scoreboard-list td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #0ff;
+    text-align: left;
+  }
+  #scoreboard-list th {
+    border-bottom: 2px solid #0ff;
+  }
+  input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    font-size: 1.1rem;
+    border-radius: 20px;
+    border: 2px solid #00ffff;
+    margin-bottom: 15px;
+    color: black;
+  }
+  @media (max-width: 600px) {
     .btn {
-      background: cyan;
-      color: black;
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      font-size: 1.3rem;
+      padding: 16px;
     }
-    .vertical-buttons {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .scoreboard-entry {
-      margin: 5px 0;
-    }
-    @media (max-width: 600px) {
-      .btn {
-        font-size: 1.5em;
-        padding: 15px 30px;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div id="home">
-    <h1>Fun Clicker Game</h1>
-    <div class="vertical-buttons">
-      <button class="btn" onclick="showModeMenu()">Start Game</button>
-      <button class="btn" onclick="showScoreboardMenu()">Scoreboard</button>
-      <button class="btn" onclick="toggleFullscreen()" id="fsBtn">Toggle Fullscreen</button>
+<div id="app">
+  <div id="main-menu">
+    <h1 style="text-align:center; margin-bottom:20px;">Fun Clicker Game</h1>
+    <div id="mode-buttons">
+      <button class="btn" data-mode="1">1 Second</button>
+      <button class="btn" data-mode="2">2 Seconds</button>
+      <button class="btn" data-mode="3">3 Seconds</button>
+      <button class="btn" data-mode="5">5 Seconds</button>
+      <button class="btn" data-mode="10">10 Seconds</button>
+      <button class="btn" data-mode="60">1 Minute</button>
+      <button class="btn" data-mode="300">5 Minutes</button>
+      <button class="btn" data-mode="600">10 Minutes</button>
+      <button class="btn" data-mode="infinite">Infinite</button>
+      <button class="btn" data-mode="basic">Basic</button>
+    </div>
+    <div id="control-buttons">
+      <button id="scoreboard-menu-btn" class="btn">Scoreboards</button>
+      <button id="fullscreen-btn" class="btn">Fullscreen</button>
     </div>
   </div>
 
-  <div id="modeMenu" class="hidden">
-    <h2>Select Mode</h2>
-    <div class="vertical-buttons" id="modeButtons"></div>
-    <button class="btn" onclick="goHome()">Back</button>
+  <div id="start-screen">
+    <h2 style="text-align:center; margin-bottom:20px;">Get Ready</h2>
+    <button id="start-game-btn" class="btn">Start Game</button>
+    <button id="back-to-menu-btn" class="btn">Back to Menu</button>
   </div>
 
-  <div id="startScreen" class="hidden">
-    <h2 id="selectedModeName"></h2>
-    <button class="btn" onclick="startGame()">Start Game</button>
-    <button class="btn" onclick="goHome()">Back</button>
-  </div>
-
-  <div id="game" class="hidden">
-    <h2 id="timer">Time: 0.0s</h2>
-    <h3>Clicks: <span id="clickCount">0</span></h3>
-    <h3>CPS: <span id="cps">0</span></h3>
-    <h3>High Score Clicks: <span id="highClicks">0</span></h3>
-    <h3>High Score CPS: <span id="highCps">0</span></h3>
-    <button class="btn" id="clickBtn" onclick="handleClick()">Click!</button>
-    <div class="vertical-buttons">
-      <button class="btn" onclick="resetGame()">Reset</button>
-      <button class="btn" onclick="goHome()">Back to Home</button>
+  <div id="game-area">
+    <div id="timer"></div>
+    <div id="infinite-timer"></div>
+    <button id="click-btn" class="btn" style="font-size:2rem; padding:30px;">Click Me!</button>
+    <div class="stats" id="live-cps">CPS: 0.00</div>
+    <div class="stats" id="live-clicks">Clicks: 0</div>
+    <div class="stats" id="high-cps">High Score CPS: 0.00</div>
+    <div class="stats" id="high-clicks">High Score Clicks: 0</div>
+    <div id="control-buttons">
+      <button id="reset-btn" class="btn">Reset</button>
+      <button id="back-home-btn" class="btn">Back to Home</button>
     </div>
   </div>
 
-  <div id="scoreboardMenu" class="hidden">
-    <h2>Scoreboards</h2>
-    <div class="vertical-buttons" id="scoreboardButtons"></div>
-    <button class="btn" onclick="goHome()">Back</button>
+  <div id="scoreboard-menu">
+    <h2 style="text-align:center; margin-bottom:20px;">Scoreboards</h2>
+    <div id="scoreboard-mode-buttons" style="display:flex; flex-direction: column; gap:12px;">
+      <button class="btn scoreboard-mode-btn" data-mode="1">1 Second</button>
+      <button class="btn scoreboard-mode-btn" data-mode="2">2 Seconds</button>
+      <button class="btn scoreboard-mode-btn" data-mode="3">3 Seconds</button>
+      <button class="btn scoreboard-mode-btn" data-mode="5">5 Seconds</button>
+      <button class="btn scoreboard-mode-btn" data-mode="10">10 Seconds</button>
+      <button class="btn scoreboard-mode-btn" data-mode="60">1 Minute</button>
+      <button class="btn scoreboard-mode-btn" data-mode="300">5 Minutes</button>
+      <button class="btn scoreboard-mode-btn" data-mode="600">10 Minutes</button>
+      <button class="btn scoreboard-mode-btn" data-mode="infinite">Infinite</button>
+      <button class="btn scoreboard-mode-btn" data-mode="basic">Basic</button>
+      <button id="scoreboard-back-btn" class="btn">Back to Menu</button>
+    </div>
   </div>
 
-  <div id="scoreboard" class="hidden">
-    <h2 id="scoreboardTitle">Scoreboard</h2>
-    <div id="scoreEntries"></div>
-    <button class="btn" onclick="showScoreboardMenu()">Back</button>
+  <div id="scoreboard-screen">
+    <h2 style="text-align:center; margin-bottom:10px;" id="scoreboard-title"></h2>
+    <div id="scoreboard-list"></div>
+    <input type="text" id="player-name" placeholder="Enter your name" maxlength="15" />
+    <button id="submit-score-btn" class="btn">Submit Score</button>
+    <button id="scoreboard-back-to-menu-btn" class="btn">Back to Scoreboards</button>
   </div>
+</div>
 
-  <script>
-    const gameModes = [
-      { label: '1s', duration: 1 },
-      { label: '2s', duration: 2 },
-      { label: '3s', duration: 3 },
-      { label: '5s', duration: 5 },
-      { label: '10s', duration: 10 },
-      { label: '1min', duration: 60 },
-      { label: '5min', duration: 300 },
-      { label: '10min', duration: 600 },
-      { label: '∞ Stopwatch', duration: -1 },
-      { label: 'Endless Clicker', duration: -2 },
-    ]
+<script>
+const modeDurations = {
+  "1": 1,
+  "2": 2,
+  "3": 3,
+  "5": 5,
+  "10": 10,
+  "60": 60,
+  "300": 300,
+  "600": 600
+};
 
-    let gameDuration = 0
-    let clickCount = 0
-    let maxSessionCps = 0
-    let clickTimestamps = []
-    let timerInterval
-    let endTime = 0
-    let infiniteStartTime = 0
+let selectedMode = null;
+let gameStarted = false;
+let clicks = 0;
+let totalClicks = 0;
+let cps = 0;
+let elapsedTime = 0;
+let remainingTime = 0;
+let lastClickTime = 0;
+let cpsHighScore = 0;
+let clicksHighScore = 0;
+let gameTimer = null;
+let infiniteStartTime = 0;
+let infiniteElapsedTime = 0;
+let cpsIntervals = [];
+const clickBtn = document.getElementById("click-btn");
+const timerDisplay = document.getElementById("timer");
+const infiniteTimerDisplay = document.getElementById("infinite-timer");
+const liveCPSDisplay = document.getElementById("live-cps");
+const liveClicksDisplay = document.getElementById("live-clicks");
+const highCPSDisplay = document.getElementById("high-cps");
+const highClicksDisplay = document.getElementById("high-clicks");
+const mainMenu = document.getElementById("main-menu");
+const startScreen = document.getElementById("start-screen");
+const gameArea = document.getElementById("game-area");
+const scoreboardMenu = document.getElementById("scoreboard-menu");
+const scoreboardScreen = document.getElementById("scoreboard-screen");
+const scoreboardList = document.getElementById("scoreboard-list");
+const playerNameInput = document.getElementById("player-name");
+const scoreboardTitle = document.getElementById("scoreboard-title");
 
-    const clickBtn = document.getElementById('clickBtn')
-    const clickCountEl = document.getElementById('clickCount')
-    const cpsEl = document.getElementById('cps')
-    const highClicksEl = document.getElementById('highClicks')
-    const highCpsEl = document.getElementById('highCps')
-    const timerEl = document.getElementById('timer')
-    const homeDiv = document.getElementById('home')
-    const modeButtonsDiv = document.getElementById('modeButtons')
-    const startScreen = document.getElementById('startScreen')
-    const gameDiv = document.getElementById('game')
-    const modeMenu = document.getElementById('modeMenu')
-    const scoreboardMenu = document.getElementById('scoreboardMenu')
-    const scoreboardDiv = document.getElementById('scoreboard')
-    const scoreboardButtons = document.getElementById('scoreboardButtons')
-    const scoreEntries = document.getElementById('scoreEntries')
-    const scoreboardTitle = document.getElementById('scoreboardTitle')
-    const selectedModeName = document.getElementById('selectedModeName')
+function saveHighScores() {
+  localStorage.setItem("clicker_highscores", JSON.stringify(highScores));
+}
 
-    function showModeMenu() {
-      homeDiv.classList.add('hidden')
-      modeMenu.classList.remove('hidden')
+function loadHighScores() {
+  let data = localStorage.getItem("clicker_highscores");
+  if (data) {
+    highScores = JSON.parse(data);
+  }
+}
+
+let highScores = {};
+loadHighScores();
+
+function getHighScoresForMode(mode) {
+  if (!highScores[mode]) {
+    highScores[mode] = {
+      clicks: 0,
+      clicksName: "",
+      cps: 0,
+      cpsName: "",
+      milestoneTime: 0,
+      milestoneName: ""
+    };
+  }
+  return highScores[mode];
+}
+
+function updateHighScores() {
+  let modeScores = getHighScoresForMode(selectedMode);
+  if (clicks > modeScores.clicks) {
+    modeScores.clicks = clicks;
+    modeScores.clicksName = "";
+  }
+  if (cps > modeScores.cps) {
+    modeScores.cps = cps;
+    modeScores.cpsName = "";
+  }
+  if (selectedMode === "infinite" && infiniteElapsedTime > 0) {
+    if (infiniteElapsedTime > modeScores.milestoneTime) {
+      modeScores.milestoneTime = infiniteElapsedTime;
+      modeScores.milestoneName = "";
     }
+  }
+  saveHighScores();
+}
 
-    function showScoreboardMenu() {
-      homeDiv.classList.add('hidden')
-      scoreboardMenu.classList.remove('hidden')
-      scoreboardButtons.innerHTML = ''
-      gameModes.forEach(mode => {
-        const btn = document.createElement('button')
-        btn.textContent = mode.label
-        btn.className = 'btn'
-        btn.onclick = () => showScoreboard(mode.duration, mode.label)
-        scoreboardButtons.appendChild(btn)
-      })
-    }
+function updateDisplay() {
+  liveCPSDisplay.textContent = "Live CPS: " + cps.toFixed(2);
+  liveClicksDisplay.textContent = "Clicks: " + clicks;
+  let modeScores = getHighScoresForMode(selectedMode);
+  highCPSDisplay.textContent = "High CPS: " + modeScores.cps.toFixed(2);
+  highClicksDisplay.textContent = "High Clicks: " + modeScores.clicks;
+  if (selectedMode === "infinite") {
+    infiniteTimerDisplay.style.display = "block";
+  } else {
+    infiniteTimerDisplay.style.display = "none";
+  }
+}
 
-    function showScoreboard(duration, label) {
-      scoreboardMenu.classList.add('hidden')
-      scoreboardDiv.classList.remove('hidden')
-      scoreboardTitle.textContent = `${label} Scoreboard`
-      const scores = JSON.parse(localStorage.getItem(`scores-${duration}`)) || []
-      scoreEntries.innerHTML = scores.map(s =>
-        `<div class="scoreboard-entry">${s.name}: ${s.clicks} clicks, ${s.cps} CPS</div>`
-      ).join('') || '<p>No scores yet.</p>'
-    }
+function formatTime(ms) {
+  let totalSeconds = ms / 1000;
+  let minutes = Math.floor(totalSeconds / 60);
+  let seconds = (totalSeconds % 60).toFixed(2);
+  return (minutes > 0 ? minutes + "m " : "") + seconds + "s";
+}
 
-    function createModeButtons() {
-      gameModes.forEach(mode => {
-        const btn = document.createElement('button')
-        btn.textContent = mode.label
-        btn.className = 'btn'
-        btn.onclick = () => {
-          gameDuration = mode.duration
-          selectedModeName.textContent = mode.label
-          modeMenu.classList.add('hidden')
-          startScreen.classList.remove('hidden')
-        }
-        modeButtonsDiv.appendChild(btn)
-      })
-    }
+function updateLiveStats() {
+  let now = performance.now();
+  cpsIntervals = cpsIntervals.filter(t => now - t <= 1000);
+  cps = cpsIntervals.length;
+  updateDisplay();
+}
 
-    function startGame() {
-      startScreen.classList.add('hidden')
-      gameDiv.classList.remove('hidden')
-      clickCount = 0
-      maxSessionCps = 0
-      clickTimestamps = []
-      clickCountEl.textContent = 0
-      cpsEl.textContent = 0
-      const hs = getHighScores()
-      highClicksEl.textContent = hs.clicks
-      highCpsEl.textContent = hs.cps
-      if (gameDuration === -1) infiniteStartTime = Date.now()
-      if (gameDuration !== -1 && gameDuration !== -2) {
-        endTime = Date.now() + gameDuration * 1000
-        timerEl.textContent = `Time Left: ${gameDuration}s`
-      } else {
-        timerEl.textContent = "Time: 0.0s"
-      }
-      clickBtn.disabled = false
-      timerInterval = setInterval(updateTimer, 100)
-    }
+function startGame() {
+  clicks = 0;
+  totalClicks = 0;
+  cps = 0;
+  elapsedTime = 0;
+  remainingTime = modeDurations[selectedMode] || 0;
+  gameStarted = false;
+  cpsIntervals = [];
+  let modeScores = getHighScoresForMode(selectedMode);
+  cpsHighScore = modeScores.cps;
+  clicksHighScore = modeScores.clicks;
+  updateDisplay();
+  if (selectedMode === "infinite") {
+    infiniteStartTime = performance.now();
+    infiniteElapsedTime = 0;
+    infiniteTimerDisplay.textContent = "Infinite 0.00s";
+    timerDisplay.textContent = "";
+    gameTimer = null;
+  } else {
+    infiniteTimerDisplay.textContent = "";
+  }
+  showStartScreen();
+}
 
-    function handleClick() {
-      const now = Date.now()
-      clickCount++
-      clickTimestamps.push(now)
-      clickCountEl.textContent = clickCount
-      updateHighScores()
-    }
+function showMainMenu() {
+  mainMenu.style.display = "block";
+  startScreen.style.display = "none";
+  gameArea.style.display = "none";
+  scoreboardMenu.style.display = "none";
+  scoreboardScreen.style.display = "none";
+}
 
-    function updateTimer() {
-      const now = Date.now()
-      const recent = clickTimestamps.filter(ts => now - ts <= 1000)
-      clickTimestamps = recent
-      const cps = recent.length
-      cpsEl.textContent = cps
-      if (cps > maxSessionCps) maxSessionCps = cps
-      updateHighScores()
+function showStartScreen() {
+  mainMenu.style.display = "none";
+  startScreen.style.display = "block";
+  gameArea.style.display = "none";
+  scoreboardMenu.style.display = "none";
+  scoreboardScreen.style.display = "none";
+}
 
-      if (gameDuration === -1) {
-        const elapsed = (now - infiniteStartTime) / 1000
-        timerEl.textContent = `Time: ${elapsed.toFixed(1)}s`
-      } else if (gameDuration !== -2) {
-        const remaining = Math.max(0, Math.ceil((endTime - now) / 1000))
-        timerEl.textContent = `Time Left: ${remaining}s`
-        if (now >= endTime) {
-          clearInterval(timerInterval)
-          clickBtn.disabled = true
-          promptScoreSave()
-        }
-      }
-    }
+function showGameArea() {
+  mainMenu.style.display = "none";
+  startScreen.style.display = "none";
+  gameArea.style.display = "block";
+  scoreboardMenu.style.display = "none";
+  scoreboardScreen.style.display = "none";
+  updateDisplay();
+  if (selectedMode === "infinite") {
+    updateInfiniteTimer();
+  }
+}
 
-    function updateHighScores() {
-      const saved = getHighScores()
-      if (clickCount > saved.clicks) highClicksEl.textContent = clickCount
-      if (maxSessionCps > saved.cps) highCpsEl.textContent = maxSessionCps
-    }
+function showScoreboardMenu() {
+  mainMenu.style.display = "none";
+  startScreen.style.display = "none";
+  gameArea.style.display = "none";
+  scoreboardMenu.style.display = "block";
+  scoreboardScreen.style.display = "none";
+}
 
-    function resetGame() {
-      clearInterval(timerInterval)
-      saveHighScores()
-      clickBtn.disabled = true
-    }
+function showScoreboardScreen(mode) {
+  mainMenu.style.display = "none";
+  startScreen.style.display = "none";
+  gameArea.style.display = "none";
+  scoreboardMenu.style.display = "none";
+  scoreboardScreen.style.display = "block";
+  scoreboardTitle.textContent = getModeName(mode) + " Scoreboard";
+  playerNameInput.value = "";
+  renderScoreboard(mode);
+}
 
-    function goHome() {
-      clearInterval(timerInterval)
-      gameDiv.classList.add('hidden')
-      startScreen.classList.add('hidden')
-      scoreboardDiv.classList.add('hidden')
-      scoreboardMenu.classList.add('hidden')
-      modeMenu.classList.add('hidden')
-      homeDiv.classList.remove('hidden')
-    }
+function getModeName(mode) {
+  if (mode === "infinite") return "Infinite";
+  if (mode === "basic") return "Basic";
+  if (modeDurations[mode]) {
+    if (mode < 60) return mode + " Second" + (mode > 1 ? "s" : "");
+    else return (mode / 60) + " Minute" + (mode > 60 ? "s" : "");
+  }
+  return mode;
+}
 
-    function getHighScores() {
-      const saved = localStorage.getItem(`mode-${gameDuration}`)
-      if (!saved) return { clicks: 0, cps: 0 }
-      return JSON.parse(saved)
-    }
+function renderScoreboard(mode) {
+  let scores = getHighScoresForMode(mode);
+  let html = `<table><thead><tr><th>Category</th><th>Name</th><th>Score</th></tr></thead><tbody>`;
+  if (mode === "infinite") {
+    html += `<tr><td>Milestone Time</td><td>${scores.milestoneName || "---"}</td><td>${scores.milestoneTime > 0 ? formatTime(scores.milestoneTime) : "---"}</td></tr>`;
+  }
+  html += `<tr><td>High Clicks</td><td>${scores.clicksName || "---"}</td><td>${scores.clicks}</td></tr>`;
+  html += `<tr><td>High CPS</td><td>${scores.cpsName || "---"}</td><td>${scores.cps.toFixed(2)}</td></tr>`;
+  html += "</tbody></table>";
+  scoreboardList.innerHTML = html;
+}
 
-    function saveHighScores() {
-      const saved = getHighScores()
-      const newClicks = Math.max(clickCount, saved.clicks)
-      const newCps = Math.max(maxSessionCps, saved.cps)
-      localStorage.setItem(`mode-${gameDuration}`, JSON.stringify({ clicks: newClicks, cps: newCps }))
-    }
-
-    function promptScoreSave() {
-      const saved = getHighScores()
-      if (clickCount > saved.clicks || maxSessionCps > saved.cps) {
-        const name = prompt("New High Score! Enter your name:") || "Anonymous"
-        const scores = JSON.parse(localStorage.getItem(`scores-${gameDuration}`)) || []
-        scores.push({ name, clicks: clickCount, cps: maxSessionCps })
-        scores.sort((a, b) => b.clicks - a.clicks || b.cps - a.cps)
-        localStorage.setItem(`scores-${gameDuration}`, JSON.stringify(scores.slice(0, 10)))
-      }
-      saveHighScores()
-    }
-
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen()
-      } else {
-        document.exitFullscreen()
-      }
-    }
-
-    createModeButtons()
-
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      document.getElementById('fsBtn').style.display = 'none'
-    }
-  </script>
-</body>
-</html>
+function resetGame() {
+  clicks = 0;
+  totalClicks = 0
