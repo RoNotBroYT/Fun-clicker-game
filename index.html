@@ -1,271 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fun Clicker Game</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #0ff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    padding: 20px;
-    user-select: none;
-  }
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-  }
-  .button-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 300px;
-    margin-top: 20px;
-  }
-  .mode-button {
-    background-color: #0ff;
-    color: #000;
-    border: none;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    box-shadow: 0 0 10px #0ff;
-    cursor: pointer;
-    text-align: center;
-    width: 100%;
-  }
-  .mode-button:hover {
-    background-color: #0cc;
-  }
-  .hidden {
-    display: none;
-  }
-  #click-button {
-    font-size: 2rem;
-    padding: 20px 40px;
-    background-color: #0ff;
-    color: #000;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    box-shadow: 0 0 20px #0ff;
-    transition: transform 0.1s;
-    margin: 20px;
-  }
-  #click-button:active {
-    transform: scale(0.95);
-  }
-  .stats {
-    margin: 10px;
-    font-size: 1.2rem;
-  }
-  #timer {
-    font-size: 1.5rem;
-    margin: 10px;
-  }
-  #start-screen p {
-    font-size: 1.2rem;
-    margin: 20px 0;
-  }
-  #control-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 300px;
-    margin-top: 20px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun Clicker Game</title>
+  <style>
+    body {
+      background-color: black;
+      color: cyan;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .hidden { display: none; }
+    .btn {
+      background: cyan;
+      color: black;
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .vertical-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .scoreboard-entry {
+      margin: 5px 0;
+    }
+    @media (max-width: 600px) {
+      .btn {
+        font-size: 1.5em;
+        padding: 15px 30px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="home">
     <h1>Fun Clicker Game</h1>
-    <p>Select mode:</p>
-    <div class="button-container" id="time-buttons"></div>
+    <div class="vertical-buttons">
+      <button class="btn" onclick="showModeMenu()">Start Game</button>
+      <button class="btn" onclick="showScoreboardMenu()">Scoreboard</button>
+      <button class="btn" onclick="toggleFullscreen()" id="fsBtn">Toggle Fullscreen</button>
+    </div>
   </div>
 
-  <div id="start-screen" class="hidden">
-    <h1>Sart Game</h1>
-    <p id="start-info"></p>
-    <div id="control-buttons">
-      <button class="mode-button" id="start-game-btn">▶ Start Game</button>
-      <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
-    </div>
+  <div id="modeMenu" class="hidden">
+    <h2>Select Mode</h2>
+    <div class="vertical-buttons" id="modeButtons"></div>
+    <button class="btn" onclick="goHome()">Back</button>
+  </div>
+
+  <div id="startScreen" class="hidden">
+    <h2 id="selectedModeName"></h2>
+    <button class="btn" onclick="startGame()">Start Game</button>
+    <button class="btn" onclick="goHome()">Back</button>
   </div>
 
   <div id="game" class="hidden">
-    <h1>Click as fast as you can!</h1>
-    <div id="timer">Time: --</div>
-    <button id="click-button" onclick="handleClick()">Click Me!</button>
-    <div class="stats">
-      <p>Total Clicks: <span id="click-count">0</span></p>
-      <p>CPS: <span id="cps">0</span></p>
-      <p>High Score Clicks: <span id="high-clicks">0</span></p>
-      <p>High Score CPS: <span id="high-cps">0</span></p>
-    </div>
-    <div id="control-buttons">
-      <button class="mode-button" onclick="resetGame()">🔄 Reset</button>
-      <button class="mode-button" onclick="goHome()">🏠 Back to Home</button>
+    <h2 id="timer">Time: 0.0s</h2>
+    <h3>Clicks: <span id="clickCount">0</span></h3>
+    <h3>CPS: <span id="cps">0</span></h3>
+    <h3>High Score Clicks: <span id="highClicks">0</span></h3>
+    <h3>High Score CPS: <span id="highCps">0</span></h3>
+    <button class="btn" id="clickBtn" onclick="handleClick()">Click!</button>
+    <div class="vertical-buttons">
+      <button class="btn" onclick="resetGame()">Reset</button>
+      <button class="btn" onclick="goHome()">Back to Home</button>
     </div>
   </div>
 
+  <div id="scoreboardMenu" class="hidden">
+    <h2>Scoreboards</h2>
+    <div class="vertical-buttons" id="scoreboardButtons"></div>
+    <button class="btn" onclick="goHome()">Back</button>
+  </div>
+
+  <div id="scoreboard" class="hidden">
+    <h2 id="scoreboardTitle">Scoreboard</h2>
+    <div id="scoreEntries"></div>
+    <button class="btn" onclick="showScoreboardMenu()">Back</button>
+  </div>
+
   <script>
-    const timeModes = [1, 2, 3, 5, 10, 60, 300, 600, -1, -2]
-    const timeButtonsContainer = document.getElementById('time-buttons')
-    const startScreen = document.getElementById('start-screen')
-    const startInfo = document.getElementById('start-info')
-    const homeDiv = document.getElementById('home')
-    const gameDiv = document.getElementById('game')
-    const clickBtn = document.getElementById('click-button')
-    const startGameBtn = document.getElementById('start-game-btn')
+    const gameModes = [
+      { label: '1s', duration: 1 },
+      { label: '2s', duration: 2 },
+      { label: '3s', duration: 3 },
+      { label: '5s', duration: 5 },
+      { label: '10s', duration: 10 },
+      { label: '1min', duration: 60 },
+      { label: '5min', duration: 300 },
+      { label: '10min', duration: 600 },
+      { label: '∞ Stopwatch', duration: -1 },
+      { label: 'Endless Clicker', duration: -2 },
+    ]
 
     let gameDuration = 0
     let clickCount = 0
-    let cps = 0
     let maxSessionCps = 0
     let clickTimestamps = []
-    let endTime = 0
     let timerInterval
+    let endTime = 0
     let infiniteStartTime = 0
 
-    const clickCountEl = document.getElementById('click-count')
+    const clickBtn = document.getElementById('clickBtn')
+    const clickCountEl = document.getElementById('clickCount')
     const cpsEl = document.getElementById('cps')
+    const highClicksEl = document.getElementById('highClicks')
+    const highCpsEl = document.getElementById('highCps')
     const timerEl = document.getElementById('timer')
-    const highClicksEl = document.getElementById('high-clicks')
-    const highCpsEl = document.getElementById('high-cps')
+    const homeDiv = document.getElementById('home')
+    const modeButtonsDiv = document.getElementById('modeButtons')
+    const startScreen = document.getElementById('startScreen')
+    const gameDiv = document.getElementById('game')
+    const modeMenu = document.getElementById('modeMenu')
+    const scoreboardMenu = document.getElementById('scoreboardMenu')
+    const scoreboardDiv = document.getElementById('scoreboard')
+    const scoreboardButtons = document.getElementById('scoreboardButtons')
+    const scoreEntries = document.getElementById('scoreEntries')
+    const scoreboardTitle = document.getElementById('scoreboardTitle')
+    const selectedModeName = document.getElementById('selectedModeName')
 
-    function createModeButtons() {
-      timeButtonsContainer.innerHTML = ''
-      timeModes.forEach(duration => {
-        let label
-        if (duration === -1) label = '∞ Infinite'
-        else if (duration === -2) label = 'Endless Clicker'
-        else label = duration >= 60 ? `${duration / 60} min` : `${duration}s`
+    function showModeMenu() {
+      homeDiv.classList.add('hidden')
+      modeMenu.classList.remove('hidden')
+    }
+
+    function showScoreboardMenu() {
+      homeDiv.classList.add('hidden')
+      scoreboardMenu.classList.remove('hidden')
+      scoreboardButtons.innerHTML = ''
+      gameModes.forEach(mode => {
         const btn = document.createElement('button')
-        btn.className = 'mode-button'
-        btn.innerText = label
-        btn.onclick = () => showStartScreen(duration)
-        timeButtonsContainer.appendChild(btn)
+        btn.textContent = mode.label
+        btn.className = 'btn'
+        btn.onclick = () => showScoreboard(mode.duration, mode.label)
+        scoreboardButtons.appendChild(btn)
       })
     }
 
-    function showStartScreen(duration) {
-      gameDuration = duration
-      let label
-      if (duration === -1) label = "Infinite"
-      else if (duration === -2) label = "Endless Clicker"
-      else label = duration >= 60 ? `${duration / 60} minute${duration > 60 ? 's' : ''}` : `${duration} second${duration > 1 ? 's' : ''}`
-      homeDiv.classList.add('hidden')
-      gameDiv.classList.add('hidden')
-      startScreen.classList.remove('hidden')
-      startInfo.textContent = `You chose ${label}. Click "Start Game" when you're ready.`
-      startGameBtn.onclick = beginGame
+    function showScoreboard(duration, label) {
+      scoreboardMenu.classList.add('hidden')
+      scoreboardDiv.classList.remove('hidden')
+      scoreboardTitle.textContent = `${label} Scoreboard`
+      const scores = JSON.parse(localStorage.getItem(`scores-${duration}`)) || []
+      scoreEntries.innerHTML = scores.map(s =>
+        `<div class="scoreboard-entry">${s.name}: ${s.clicks} clicks, ${s.cps} CPS</div>`
+      ).join('') || '<p>No scores yet.</p>'
     }
 
-    function beginGame() {
-      clickCount = 0
-      cps = 0
-      maxSessionCps = 0
-      clickTimestamps = []
-      infiniteStartTime = Date.now()
+    function createModeButtons() {
+      gameModes.forEach(mode => {
+        const btn = document.createElement('button')
+        btn.textContent = mode.label
+        btn.className = 'btn'
+        btn.onclick = () => {
+          gameDuration = mode.duration
+          selectedModeName.textContent = mode.label
+          modeMenu.classList.add('hidden')
+          startScreen.classList.remove('hidden')
+        }
+        modeButtonsDiv.appendChild(btn)
+      })
+    }
 
-      if (gameDuration === -1) timerEl.textContent = "Time: 0.0s"
-      else if (gameDuration === -2) timerEl.textContent = "Endless Mode"
-      else {
-        endTime = Date.now() + gameDuration * 1000
-        timerEl.textContent = `Time Left: ${gameDuration}s`
-      }
-
-      clickCountEl.textContent = 0
-      cpsEl.textContent = 0
-
-      const highData = getHighScores()
-      highClicksEl.textContent = highData.clicks
-      highCpsEl.textContent = highData.cps
-
+    function startGame() {
       startScreen.classList.add('hidden')
       gameDiv.classList.remove('hidden')
+      clickCount = 0
+      maxSessionCps = 0
+      clickTimestamps = []
+      clickCountEl.textContent = 0
+      cpsEl.textContent = 0
+      const hs = getHighScores()
+      highClicksEl.textContent = hs.clicks
+      highCpsEl.textContent = hs.cps
+      if (gameDuration === -1) infiniteStartTime = Date.now()
+      if (gameDuration !== -1 && gameDuration !== -2) {
+        endTime = Date.now() + gameDuration * 1000
+        timerEl.textContent = `Time Left: ${gameDuration}s`
+      } else {
+        timerEl.textContent = "Time: 0.0s"
+      }
       clickBtn.disabled = false
-
-      clearInterval(timerInterval)
       timerInterval = setInterval(updateTimer, 100)
+    }
+
+    function handleClick() {
+      const now = Date.now()
+      clickCount++
+      clickTimestamps.push(now)
+      clickCountEl.textContent = clickCount
+      updateHighScores()
     }
 
     function updateTimer() {
       const now = Date.now()
+      const recent = clickTimestamps.filter(ts => now - ts <= 1000)
+      clickTimestamps = recent
+      const cps = recent.length
+      cpsEl.textContent = cps
+      if (cps > maxSessionCps) maxSessionCps = cps
+      updateHighScores()
+
       if (gameDuration === -1) {
         const elapsed = (now - infiniteStartTime) / 1000
         timerEl.textContent = `Time: ${elapsed.toFixed(1)}s`
-      } else if (gameDuration === -2) {
-        timerEl.textContent = `Endless Mode`
-      } else {
+      } else if (gameDuration !== -2) {
         const remaining = Math.max(0, Math.ceil((endTime - now) / 1000))
         timerEl.textContent = `Time Left: ${remaining}s`
-      }
-
-      const recentClicks = clickTimestamps.filter(ts => now - ts <= 1000)
-      cps = recentClicks.length
-      cpsEl.textContent = cps
-      clickTimestamps = recentClicks
-
-      if (cps > maxSessionCps) maxSessionCps = cps
-
-      const saved = getHighScores()
-      if (clickCount > saved.clicks) {
-        saved.clicks = clickCount
-        highClicksEl.textContent = clickCount
-      }
-      if (maxSessionCps > saved.cps) {
-        saved.cps = maxSessionCps
-        highCpsEl.textContent = maxSessionCps
-      }
-      localStorage.setItem(`mode-${gameDuration}`, JSON.stringify(saved))
-
-      if (gameDuration > 0 && now >= endTime) {
-        clearInterval(timerInterval)
-        timerEl.textContent = "Time's up!"
-        clickBtn.disabled = true
+        if (now >= endTime) {
+          clearInterval(timerInterval)
+          clickBtn.disabled = true
+          promptScoreSave()
+        }
       }
     }
 
-    function handleClick() {
-      clickCount++
-      clickTimestamps.push(Date.now())
-      clickCountEl.textContent = clickCount
+    function updateHighScores() {
+      const saved = getHighScores()
+      if (clickCount > saved.clicks) highClicksEl.textContent = clickCount
+      if (maxSessionCps > saved.cps) highCpsEl.textContent = maxSessionCps
     }
 
     function resetGame() {
+      clearInterval(timerInterval)
       saveHighScores()
-      clickCount = 0
-      cps = 0
-      maxSessionCps = 0
-      clickTimestamps = []
-      clickCountEl.textContent = 0
-      cpsEl.textContent = 0
-      const highData = getHighScores()
-      highClicksEl.textContent = highData.clicks
-      highCpsEl.textContent = highData.cps
-      if (gameDuration === -1) infiniteStartTime = Date.now()
-      if (gameDuration === -2) timerEl.textContent = "Endless Mode"
-      if (gameDuration > 0) {
-        endTime = Date.now() + gameDuration * 1000
-        timerEl.textContent = `Time Left: ${gameDuration}s`
-      }
-      clickBtn.disabled = false
+      clickBtn.disabled = true
     }
 
     function goHome() {
       clearInterval(timerInterval)
-      startScreen.classList.add('hidden')
       gameDiv.classList.add('hidden')
+      startScreen.classList.add('hidden')
+      scoreboardDiv.classList.add('hidden')
+      scoreboardMenu.classList.add('hidden')
+      modeMenu.classList.add('hidden')
       homeDiv.classList.remove('hidden')
-      gameDuration = 0
     }
 
     function getHighScores() {
@@ -276,12 +254,36 @@
 
     function saveHighScores() {
       const saved = getHighScores()
-      let newClicks = clickCount > saved.clicks ? clickCount : saved.clicks
-      let newCps = maxSessionCps > saved.cps ? maxSessionCps : saved.cps
+      const newClicks = Math.max(clickCount, saved.clicks)
+      const newCps = Math.max(maxSessionCps, saved.cps)
       localStorage.setItem(`mode-${gameDuration}`, JSON.stringify({ clicks: newClicks, cps: newCps }))
     }
 
+    function promptScoreSave() {
+      const saved = getHighScores()
+      if (clickCount > saved.clicks || maxSessionCps > saved.cps) {
+        const name = prompt("New High Score! Enter your name:") || "Anonymous"
+        const scores = JSON.parse(localStorage.getItem(`scores-${gameDuration}`)) || []
+        scores.push({ name, clicks: clickCount, cps: maxSessionCps })
+        scores.sort((a, b) => b.clicks - a.clicks || b.cps - a.cps)
+        localStorage.setItem(`scores-${gameDuration}`, JSON.stringify(scores.slice(0, 10)))
+      }
+      saveHighScores()
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+      } else {
+        document.exitFullscreen()
+      }
+    }
+
     createModeButtons()
+
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      document.getElementById('fsBtn').style.display = 'none'
+    }
   </script>
 </body>
 </html>
